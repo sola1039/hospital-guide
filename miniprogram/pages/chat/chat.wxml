@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="mode-tabs">
+    <view class="mode-tab {{mode === 'chat' ? 'active' : ''}}" bindtap="switchMode" data-mode="chat">对话咨询</view>
+    <view class="mode-tab {{mode === 'triage' ? 'active' : ''}}" bindtap="switchMode" data-mode="triage">智能导诊</view>
+  </view>
+
+  <block wx:if="{{mode === 'triage'}}">
+    <view class="card">
+      <view class="title-md">请描述不舒服的情况</view>
+      <input class="symptom-input" placeholder="例如: 牙疼两天了, 晚上疼得睡不着" value="{{symptomText}}" bindinput="onSymptomInput" maxlength="200" confirm-type="send" bindconfirm="startTriage" />
+      <view class="btn-primary" bindtap="startTriage">开始导诊</view>
+    </view>
+
+    <view class="card" wx:if="{{triageResult}}">
+      <view class="title-md">建议科室</view>
+      <view class="dept-box">
+        <view class="title-lg">{{triageResult.dept.name}}</view>
+        <view class="text-body">在 {{triageResult.dept.floor}} 楼 | {{triageResult.dept.intro}}</view>
+        <view class="text-hint">{{triageResult.suggestion}}</view>
+      </view>
+      <view wx:if="{{triageResult.exam_prep.length > 0}}" class="prep-box">
+        <view class="title-md">检查前注意</view>
+        <view class="text-body" wx:for="{{triageResult.exam_prep}}" wx:key="id">{{item.exam_name}}: {{item.prep_text}}</view>
+      </view>
+      <view wx:if="{{triageResult.alternatives.length > 0}}" class="alt-box">
+        <view class="text-hint">不确定? 也可以选:</view>
+        <view class="tag" wx:for="{{triageResult.alternatives}}" wx:key="id" bindtap="pickAlternative" data-index="{{index}}">{{item.name}}</view>
+      </view>
+      <view class="btn-primary" bindtap="makeJourneyCard">生成就诊流程卡</view>
+      <view class="btn-secondary" bindtap="goNavigateToDept">带我去这个科室</view>
+    </view>
+  </block>
+
+  <block wx:if="{{mode === 'chat'}}">
+    <view class="msg-list">
+      <view class="msg {{item.role === 'user' ? 'msg-user' : 'msg-ai'}}" wx:for="{{messages}}" wx:key="index">
+        <view class="msg-text">{{item.text}}</view>
+      </view>
+      <view class="msg msg-ai" wx:if="{{loading}}">
+        <view class="msg-text">正在思考中...</view>
+      </view>
+    </view>
+    <view class="quick-bar">
+      <view class="tag" wx:for="{{quickChips}}" wx:key="index" bindtap="tapChip" data-text="{{item}}">{{item}}</view>
+    </view>
+    <view class="input-bar">
+      <input class="chat-input" placeholder="跟我说说您的问题" value="{{inputText}}" bindinput="onChatInput" confirm-type="send" bindconfirm="sendCurrent" />
+      <view class="send-btn" bindtap="sendCurrent">发送</view>
+    </view>
+    <view class="btn-secondary" bindtap="goJourney">查看我的就诊流程</view>
+  </block>
+</view>

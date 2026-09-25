@@ -1,0 +1,45 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/navigate/navigate",
+    "pages/my/my",
+    "pages/chat/chat",
+    "pages/journey/journey",
+    "pages/guide/guide",
+    "pages/register/register"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#2f6fed",
+    "navigationBarTitleText": "就医陪伴助手",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f2f5f9"
+  },
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#2f6fed",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tab/home.png",
+        "selectedIconPath": "static/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/navigate/navigate",
+        "text": "院内导航",
+        "iconPath": "static/tab/navigate.png",
+        "selectedIconPath": "static/tab/navigate-active.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "static/tab/my.png",
+        "selectedIconPath": "static/tab/my-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

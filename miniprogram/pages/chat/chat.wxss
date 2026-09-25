@@ -1,0 +1,110 @@
+.mode-tabs {
+  display: flex;
+  background: #ffffff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.mode-tab {
+  flex: 1;
+  text-align: center;
+  padding: 26rpx 0;
+  font-size: 34rpx;
+  color: #555555;
+}
+
+.mode-tab.active {
+  background: #2f6fed;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.symptom-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #f5f8fc;
+  border-radius: 14rpx;
+  padding: 22rpx 20rpx;
+  margin: 20rpx 0;
+  font-size: 32rpx;
+}
+
+.dept-box {
+  background: #e8f0fe;
+  border-radius: 16rpx;
+  padding: 26rpx;
+  margin: 16rpx 0;
+}
+
+.prep-box, .alt-box {
+  margin: 20rpx 0;
+}
+
+.msg-list {
+  padding: 8rpx 24rpx;
+}
+
+.msg {
+  display: flex;
+  margin: 20rpx 0;
+}
+
+.msg-user {
+  justify-content: flex-end;
+}
+
+.msg-ai {
+  justify-content: flex-start;
+}
+
+.msg-text {
+  max-width: 78%;
+  padding: 24rpx 28rpx;
+  border-radius: 20rpx;
+  font-size: 32rpx;
+  line-height: 1.7;
+}
+
+.msg-user .msg-text {
+  background: #2f6fed;
+  color: #ffffff;
+  border-bottom-right-radius: 6rpx;
+}
+
+.msg-ai .msg-text {
+  background: #ffffff;
+  color: #222222;
+  border-bottom-left-radius: 6rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.quick-bar {
+  padding: 12rpx 24rpx;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: #ffffff;
+}
+
+.chat-input {
+  flex: 1;
+  background: #f5f8fc;
+  border-radius: 14rpx;
+  padding: 20rpx 24rpx;
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.send-btn {
+  background: #2f6fed;
+  color: #ffffff;
+  font-size: 32rpx;
+  padding: 20rpx 36rpx;
+  border-radius: 14rpx;
+}

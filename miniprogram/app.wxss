@@ -1,0 +1,112 @@
+/* 全局适老化样式: 大字、大按钮、高对比 */
+page {
+  background: #f2f5f9;
+  color: #222222;
+  font-size: 32rpx;
+  line-height: 1.7;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.title-lg {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1a2b4a;
+}
+
+.title-md {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a2b4a;
+}
+
+.text-body {
+  font-size: 32rpx;
+  color: #333333;
+}
+
+.text-hint {
+  font-size: 28rpx;
+  color: #777777;
+}
+
+.btn-primary {
+  background: #2f6fed;
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: 600;
+  height: 100rpx;
+  line-height: 100rpx;
+  border-radius: 18rpx;
+  text-align: center;
+  margin: 24rpx 0;
+}
+
+.btn-primary.disabled {
+  background: #a8c0ee;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #2f6fed;
+  border: 3rpx solid #2f6fed;
+  font-size: 34rpx;
+  height: 96rpx;
+  line-height: 90rpx;
+  border-radius: 18rpx;
+  text-align: center;
+  margin: 24rpx 0;
+}
+
+.btn-danger {
+  background: #d64541;
+  color: #ffffff;
+  font-size: 34rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 18rpx;
+  text-align: center;
+  margin: 24rpx 0;
+}
+
+.tag {
+  display: inline-block;
+  background: #e8f0fe;
+  color: #2f6fed;
+  font-size: 28rpx;
+  padding: 8rpx 22rpx;
+  border-radius: 999rpx;
+  margin: 8rpx 12rpx 8rpx 0;
+}
+
+.tag-warn {
+  background: #fff3e0;
+  color: #b25c00;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.divider {
+  height: 2rpx;
+  background: #eef1f5;
+  margin: 20rpx 0;
+}

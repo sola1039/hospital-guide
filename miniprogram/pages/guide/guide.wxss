@@ -1,0 +1,29 @@
+.mode-tabs {
+  display: flex;
+  background: #ffffff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.mode-tab {
+  flex: 1;
+  text-align: center;
+  padding: 26rpx 0;
+  font-size: 34rpx;
+  color: #555555;
+}
+
+.mode-tab.active {
+  background: #2f6fed;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.guide-card {
+  border-left: 8rpx solid #2f6fed;
+}
+
+.guide-content {
+  margin-top: 14rpx;
+}

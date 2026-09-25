@@ -1,0 +1,48 @@
+.form-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+}
+
+.form-label {
+  width: 120rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a2b4a;
+}
+
+.form-input, .form-picker {
+  flex: 1;
+  background: #f5f8fc;
+  border-radius: 14rpx;
+  padding: 22rpx 24rpx;
+  font-size: 32rpx;
+}
+
+.doctor-row {
+  display: flex;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 2rpx solid #eef1f5;
+}
+
+.doctor-row.selected {
+  background: #e8f0fe;
+  border-radius: 14rpx;
+  padding: 22rpx;
+}
+
+.doctor-name {
+  font-weight: 700;
+}
+
+.result-card {
+  border-top: 8rpx solid #2e9e6b;
+}
+
+.record-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 2rpx solid #eef1f5;
+}

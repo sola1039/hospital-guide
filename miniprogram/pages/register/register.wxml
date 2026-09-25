@@ -1,0 +1,62 @@
+<view class="page">
+  <view class="card">
+    <view class="title-md">挂号信息</view>
+    <view class="form-row">
+      <view class="form-label">就诊人</view>
+      <input class="form-input" placeholder="请输入姓名" value="{{patientName}}" bindinput="onNameInput" />
+    </view>
+    <view class="form-row">
+      <view class="form-label">科室</view>
+      <picker mode="selector" range="{{deptList}}" range-key="name" value="{{deptIndex}}" bindchange="onDeptChange">
+        <view class="form-picker">{{deptList[deptIndex].name || '请选择'}}</view>
+      </picker>
+    </view>
+    <view class="form-row">
+      <view class="form-label">日期</view>
+      <picker mode="selector" range="{{dates}}" range-key="label" value="{{dateIndex}}" bindchange="onDateChange">
+        <view class="form-picker">{{dates[dateIndex].label}}</view>
+      </picker>
+    </view>
+    <view class="form-row">
+      <view class="form-label">时段</view>
+      <picker mode="selector" range="{{slots}}" value="{{slotIndex}}" bindchange="onSlotChange">
+        <view class="form-picker">{{slots[slotIndex]}}</view>
+      </picker>
+    </view>
+    <view class="btn-primary" bindtap="submit">确认挂号</view>
+    <view class="text-hint">这是演示流程, 不会产生真实费用</view>
+  </view>
+
+  <view class="card">
+    <view class="title-md">选择医生</view>
+    <view class="doctor-row {{doctorIndex === index ? 'selected' : ''}}"
+          wx:for="{{doctorList}}" wx:key="id" bindtap="pickDoctor" data-index="{{index}}">
+      <view class="flex-1">
+        <view class="text-body doctor-name">{{item.name}} {{item.title}}</view>
+        <view class="text-hint">出诊: {{item.schedule_text}}</view>
+        <view class="text-hint">{{item.intro}}</view>
+      </view>
+      <view class="tag">{{doctorIndex === index ? '已选' : '选择'}}</view>
+    </view>
+    <view class="text-hint" wx:if="{{doctorList.length === 0}}">该科室暂无演示医生</view>
+  </view>
+
+  <view class="card result-card" wx:if="{{result}}">
+    <view class="title-md">挂号成功</view>
+    <view class="text-body">挂号号: {{result.registration_id}}</view>
+    <view class="text-body">{{result.patient_name}} | {{result.dept}} | {{result.doctor}}</view>
+    <view class="text-body">{{result.visit_date}} {{result.slot}}</view>
+  </view>
+
+  <view class="card">
+    <view class="title-md">挂号记录</view>
+    <view class="record-row" wx:for="{{records}}" wx:key="id">
+      <view class="flex-1">
+        <view class="text-body">{{item.dept_name}} | {{item.doctor_name}}</view>
+        <view class="text-hint">{{item.visit_date}} {{item.slot}} | {{item.status}}</view>
+      </view>
+      <view class="tag">{{item.floor}}F</view>
+    </view>
+    <view class="text-hint" wx:if="{{records.length === 0}}">还没有挂号记录</view>
+  </view>
+</view>

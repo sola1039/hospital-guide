@@ -1,0 +1,94 @@
+.hero {
+  padding: 48rpx 40rpx 24rpx;
+  background: linear-gradient(160deg, #2f6fed, #4a8af4);
+  color: #ffffff;
+  border-radius: 0 0 36rpx 36rpx;
+}
+
+.hero .title-lg {
+  color: #ffffff;
+}
+
+.hero-sub {
+  margin-top: 12rpx;
+  font-size: 30rpx;
+  opacity: 0.92;
+}
+
+.ai-card {
+  margin-top: -8rpx;
+  border: 3rpx solid #2f6fed;
+}
+
+.ai-badge {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  background: #2f6fed;
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+
+.arrow {
+  color: #2f6fed;
+  font-size: 40rpx;
+  font-weight: 700;
+  padding-left: 12rpx;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 12rpx;
+}
+
+.grid-item {
+  width: 340rpx;
+  box-sizing: border-box;
+  margin: 12rpx;
+  padding: 30rpx 26rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.grid-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 38rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.icon-blue { background: #2f6fed; }
+.icon-green { background: #2e9e6b; }
+.icon-orange { background: #e8833a; }
+.icon-purple { background: #7c5cd6; }
+.icon-red { background: #d64541; }
+.icon-gray { background: #6b7a90; }
+
+.grid-text {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a2b4a;
+}
+
+.grid-hint {
+  font-size: 26rpx;
+  color: #8a93a3;
+  margin-top: 6rpx;
+}
+
+.tip-line {
+  margin-top: 12rpx;
+}

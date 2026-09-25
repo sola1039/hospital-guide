@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>平面图路网标注工具</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; margin: 0; display: flex; height: 100vh; }
+  #sidebar { width: 330px; min-width: 330px; padding: 12px; box-sizing: border-box; background: #f5f7fa; overflow-y: auto; border-right: 1px solid #ddd; }
+  #main { flex: 1; display: flex; flex-direction: column; align-items: center; background: #e8ecf1; overflow: auto; }
+  h3 { margin: 12px 0 6px; font-size: 15px; }
+  button { padding: 7px 10px; margin: 3px; cursor: pointer; border: 1px solid #bbb; border-radius: 4px; background: #fff; font-size: 13px; }
+  button.active { background: #2b6de8; color: #fff; border-color: #2b6de8; }
+  select, input[type="text"] { padding: 5px; margin: 3px 0; width: 100%; box-sizing: border-box; }
+  #wrap { position: relative; margin: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  canvas { display: block; cursor: crosshair; }
+  #status { padding: 8px 14px; background: #fff; border-top: 1px solid #ddd; font-size: 13px; width: 100%; box-sizing: border-box; }
+  #nodeList { max-height: 240px; overflow-y: auto; border: 1px solid #ccc; background: #fff; font-size: 12px; }
+  #nodeList div { padding: 3px 6px; cursor: pointer; border-bottom: 1px solid #eee; }
+  #nodeList div:hover { background: #eef4ff; }
+  .hint { font-size: 12px; color: #666; line-height: 1.7; background: #fffbe6; padding: 8px; border-radius: 4px; margin-top: 8px; }
+  label { font-size: 13px; color: #444; }
+</style>
+</head>
+<body>
+<div id="sidebar">
+  <h3>1. 选择楼层并加载</h3>
+  <select id="floorSel">
+    <option value="1">1F</option>
+    <option value="2">2F</option>
+    <option value="3">3F</option>
+    <option value="4">4F</option>
+  </select>
+  <button id="btnLoadImg">加载平面图</button>
+  <button id="btnLoadJson">加载路网JSON</button>
+  <h3>2. 标注模式</h3>
+  <button id="modeMove" class="active">拖动 / 选中</button>
+  <button id="modeNode">加节点</button>
+  <button id="modeEdge">加边（点两个节点）</button>
+  <button id="modeDel">删除（点节点）</button>
+  <label>新节点类型</label>
+  <select id="nodeType">
+    <option value="junction">路口 junction</option>
+    <option value="poi">科室/房间 poi</option>
+    <option value="elev">电梯 elev</option>
+    <option value="stair">楼梯 stair</option>
+    <option value="escalator">扶梯 escalator</option>
+    <option value="entrance">入口 entrance</option>
+    <option value="hall">大厅 hall</option>
+    <option value="wc">卫生间 wc</option>
+  </select>
+  <label>新节点名称</label>
+  <input type="text" id="nodeName" placeholder="如：放射科">
+  <h3>3. 导出</h3>
+  <button id="btnSaveJson">导出路网JSON</button>
+  <button id="btnSaveSvg">导出SVG（simpleroutingsvg规范）</button>
+  <button id="btnClear">清空当前层标注</button>
+  <div class="hint">
+    用法：拖动模式可微调节点坐标；加节点时先在左侧选类型、填名称，再点图上位置；
+    加边时依次点两个节点，Esc 可取消；删除模式点节点即删（连带其边）。<br>
+    垂直交通节点（电梯/楼梯/扶梯）请画在对应设施图标位置，
+    跨楼层的 link 分组在导出后由 vertical_links.json 统一维护。
+  </div>
+  <h3>节点列表（点击定位）</h3>
+  <div id="nodeList"></div>
+</div>
+<div id="main">
+  <div id="wrap"><canvas id="cv"></canvas></div>
+  <div id="status">就绪。先点"加载平面图"。</div>
+</div>
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const state = {
+  floor: 1, img: null, nodes: [], edges: [],
+  mode: 'move', pending: null, drag: null, sel: null,
+  mouse: { x: 0, y: 0 }
+};
+const TYPE_COLOR = {
+  junction: '#8a8a8a', poi: '#2b6de8', elev: '#e6a23c', stair: '#b8860b',
+  escalator: '#9b59b6', entrance: '#27ae60', hall: '#16a085', wc: '#7f8c8d'
+};
+
+function $(id) { return document.getElementById(id); }
+function setStatus(msg) { $('status').textContent = msg; }
+function nodeById(id) {
+  for (let i = 0; i < state.nodes.length; i++) {
+    if (state.nodes[i].id === id) return state.nodes[i];
+  }
+  return null;
+}
+
+function loadImg() {
+  state.floor = parseInt($('floorSel').value, 10);
+  const img = new Image();
+  img.onload = function () {
+    state.img = img;
+    cv.width = img.width;
+    cv.height = img.height;
+    redraw();
+    setStatus('已加载 floor' + state.floor + ' 平面图 (' + img.width + 'x' + img.height + ')');
+  };
+  img.onerror = function () {
+    setStatus('平面图加载失败，请确认 input/data_source/floor_maps/floor' + state.floor + '.jpg 存在');
+  };
+  img.src = '../../input/data_source/floor_maps/floor' + state.floor + '.jpg';
+}
+
+function loadJson() {
+  const url = '../../input/data_source/nav_data/floor' + state.floor + '.json';
+  fetch(url).then(function (r) {
+    if (!r.ok) throw new Error('http ' + r.status);
+    return r.json();
+  }).then(function (g) {
+    adoptGraph(g);
+    setStatus('已加载路网: ' + state.nodes.length + ' 节点 / ' + state.edges.length + ' 边');
+  }).catch(function () {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json';
+    inp.onchange = function () {
+      const file = inp.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        try {
+          adoptGraph(JSON.parse(reader.result));
+          setStatus('已从本地文件加载路网');
+        } catch (e) {
+          setStatus('JSON 解析失败: ' + e.message);
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    };
+    inp.click();
+  });
+}
+
+function adoptGraph(g) {
+  state.nodes = (g.nodes || []).map(function (n) {
+    return { id: n.id, x: n.x, y: n.y, type: n.type || 'junction', name: n.name || n.id, link: n.link || '' };
+  });
+  state.edges = (g.edges || []).map(function (e) { return [e[0], e[1]]; });
+  state.pending = null;
+  state.sel = null;
+  redraw();
+  renderList();
+}
+
+function redraw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (state.img) ctx.drawImage(state.img, 0, 0);
+  state.edges.forEach(function (e) {
+    const a = nodeById(e[0]);
+    const b = nodeById(e[1]);
+    if (!a || !b) return;
+    ctx.strokeStyle = '#2b6de8';
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  });
+  if (state.pending) {
+    const a = nodeById(state.pending);
+    if (a) {
+      ctx.strokeStyle = '#e67e22';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(state.mouse.x, state.mouse.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+  state.nodes.forEach(function (n) {
+    const selected = state.sel === n.id;
+    ctx.fillStyle = TYPE_COLOR[n.type] || '#888888';
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, selected ? 11 : 8, 0, Math.PI * 2);
+    ctx.fill();
+    if (selected) {
+      ctx.strokeStyle = '#e91e63';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    ctx.font = '13px Microsoft YaHei';
+    ctx.fillStyle = '#111111';
+    ctx.fillText(n.name, n.x + 12, n.y + 4);
+    ctx.font = '10px Microsoft YaHei';
+    ctx.fillStyle = '#555555';
+    ctx.fillText(n.id, n.x + 12, n.y + 18);
+  });
+}
+
+function hit(x, y) {
+  let best = null;
+  let bd = 15;
+  state.nodes.forEach(function (n) {
+    const d = Math.sqrt((n.x - x) * (n.x - x) + (n.y - y) * (n.y - y));
+    if (d < bd) { bd = d; best = n; }
+  });
+  return best;
+}
+
+function canvasPos(evt) {
+  const rect = cv.getBoundingClientRect();
+  return {
+    x: (evt.clientX - rect.left) * cv.width / rect.width,
+    y: (evt.clientY - rect.top) * cv.height / rect.height
+  };
+}
+
+function renderList() {
+  const box = $('nodeList');
+  box.innerHTML = '';
+  state.nodes.forEach(function (n) {
+    const div = document.createElement('div');
+    div.textContent = n.name + ' (' + n.type + ') [' + n.id + ']';
+    div.onclick = function () {
+      state.sel = n.id;
+      redraw();
+      setStatus('选中: ' + n.name + ' @ (' + Math.round(n.x) + ',' + Math.round(n.y) + ')');
+    };
+    box.appendChild(div);
+  });
+}
+
+cv.addEventListener('mousedown', function (evt) {
+  const p = canvasPos(evt);
+  const n = hit(p.x, p.y);
+  if (state.mode === 'move') {
+    if (n) {
+      state.drag = n;
+      state.sel = n.id;
+      redraw();
+      renderList();
+    }
+  } else if (state.mode === 'node') {
+    if (n) {
+      setStatus('该位置已有节点，请点空白处');
+      return;
+    }
+    const type = $('nodeType').value;
+    let name = $('nodeName').value.trim();
+    if (!name) name = type + '_' + (state.nodes.length + 1);
+    const id = state.floor + 'f_' + type + '_' + (state.nodes.length + 1) + '_' + Math.round(p.x);
+    state.nodes.push({ id: id, x: Math.round(p.x), y: Math.round(p.y), type: type, name: name, link: '' });
+    $('nodeName').value = '';
+    redraw();
+    renderList();
+    setStatus('已添加节点: ' + name + ' (' + id + ')');
+  } else if (state.mode === 'edge') {
+    if (!n) return;
+    if (!state.pending) {
+      state.pending = n.id;
+      setStatus('起点: ' + n.name + '，请点击终点节点（Esc 取消）');
+    } else {
+      if (state.pending === n.id) {
+        setStatus('起点终点不能相同');
+        return;
+      }
+      const exists = state.edges.some(function (e) {
+        return (e[0] === state.pending && e[1] === n.id) || (e[0] === n.id && e[1] === state.pending);
+      });
+      if (exists) {
+        setStatus('这两个节点已有连线');
+      } else {
+        state.edges.push([state.pending, n.id]);
+        setStatus('已连线: ' + state.pending + ' <-> ' + n.id);
+      }
+      state.pending = null;
+      redraw();
+    }
+  } else if (state.mode === 'del') {
+    if (!n) return;
+    state.nodes = state.nodes.filter(function (x) { return x.id !== n.id; });
+    state.edges = state.edges.filter(function (e) { return e[0] !== n.id && e[1] !== n.id; });
+    if (state.sel === n.id) state.sel = null;
+    redraw();
+    renderList();
+    setStatus('已删除节点: ' + n.id + '（连带其边）');
+  }
+});
+
+cv.addEventListener('mousemove', function (evt) {
+  const p = canvasPos(evt);
+  state.mouse = p;
+  if (state.drag) {
+    state.drag.x = Math.round(p.x);
+    state.drag.y = Math.round(p.y);
+    redraw();
+  } else if (state.pending) {
+    redraw();
+  }
+});
+
+cv.addEventListener('mouseup', function () {
+  if (state.drag) {
+    setStatus('已移动: ' + state.drag.id + ' -> (' + Math.round(state.drag.x) + ',' + Math.round(state.drag.y) + ')');
+    state.drag = null;
+    renderList();
+  }
+});
+
+document.addEventListener('keydown', function (evt) {
+  if (evt.key === 'Escape' && state.pending) {
+    state.pending = null;
+    redraw();
+    setStatus('已取消连线');
+  }
+});
+
+function setMode(mode) {
+  state.mode = mode;
+  state.pending = null;
+  ['modeMove', 'modeNode', 'modeEdge', 'modeDel'].forEach(function (id) {
+    $(id).classList.remove('active');
+  });
+  const map = { move: 'modeMove', node: 'modeNode', edge: 'modeEdge', del: 'modeDel' };
+  $(map[mode]).classList.add('active');
+  redraw();
+  const tips = {
+    move: '拖动模式：按住节点拖动可微调坐标',
+    node: '加节点模式：点平面图空白处添加节点',
+    edge: '加边模式：依次点击两个节点',
+    del: '删除模式：点击节点删除'
+  };
+  setStatus(tips[mode]);
+}
+
+function download(filename, content, mime) {
+  const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+}
+
+function exportJson() {
+  const nodes = state.nodes.map(function (n) {
+    const o = { id: n.id, x: Math.round(n.x), y: Math.round(n.y), type: n.type, name: n.name };
+    if (n.link) o.link = n.link;
+    return o;
+  });
+  const g = {
+    floor: state.floor,
+    image: 'floor_maps/floor' + state.floor + '.jpg',
+    width: cv.width || 1200,
+    height: cv.height || 800,
+    nodes: nodes,
+    edges: state.edges
+  };
+  download('floor' + state.floor + '.json', JSON.stringify(g, null, 1), 'application/json');
+  setStatus('已导出 floor' + state.floor + '.json（请放回 input/data_source/nav_data/ 覆盖同名文件）');
+}
+
+function exportSvg() {
+  if (!state.img) {
+    setStatus('请先加载平面图再导出 SVG');
+    return;
+  }
+  const off = document.createElement('canvas');
+  off.width = cv.width;
+  off.height = cv.height;
+  off.getContext('2d').drawImage(state.img, 0, 0);
+  const dataUrl = off.toDataURL('image/jpeg', 0.85);
+  const NL = String.fromCharCode(10);
+  const parts = [];
+  parts.push('<?xml version="1.0" encoding="UTF-8"?>');
+  parts.push('<svg xmlns="http://www.w3.org/2000/svg" id="svg" width="' + cv.width + '" height="' + cv.height + '" viewBox="0 0 ' + cv.width + ' ' + cv.height + '">');
+  parts.push('<image id="base_map" href="' + dataUrl + '" x="0" y="0" width="' + cv.width + '" height="' + cv.height + '"/>');
+  parts.push('<g id="route" fill="none" stroke="#e91e63" stroke-width="6" stroke-linecap="round">');
+  state.edges.forEach(function (e) {
+    const a = nodeById(e[0]);
+    const b = nodeById(e[1]);
+    if (!a || !b) return;
+    parts.push('<path id="' + e[0] + '_' + e[1] + '" d="M ' + Math.round(a.x) + ' ' + Math.round(a.y) + ' L ' + Math.round(b.x) + ' ' + Math.round(b.y) + '" display="none"/>');
+  });
+  parts.push('</g>');
+  parts.push('<g id="blocks">');
+  state.nodes.forEach(function (n) {
+    if (n.type !== 'poi' && n.type !== 'entrance' && n.type !== 'hall') return;
+    parts.push('<rect id="block_' + n.id + '" x="' + (Math.round(n.x) - 45) + '" y="' + (Math.round(n.y) - 28) + '" width="90" height="56" fill="#ffffff" fill-opacity="0.01" stroke="#2b6de8" stroke-width="2" onclick="selectBlock(this.id)"/>');
+    parts.push('<text x="' + Math.round(n.x) + '" y="' + (Math.round(n.y) + 6) + '" text-anchor="middle" font-size="16" fill="#111111">' + n.name + '</text>');
+  });
+  parts.push('</g>');
+  parts.push('<script><![CDATA[');
+  parts.push('function changeAttribute(id, key, value) { var el = document.getElementById(id); if (el) el.setAttribute(key, value); }');
+  parts.push('function selectBlock(id) { var el = document.getElementById(id); if (!el) return; el.setAttribute("fill", "#ffe58f"); }');
+  parts.push('function showRoute(ids) { ids.forEach(function (id) { changeAttribute(id, "display", "yes"); }); }');
+  parts.push(']]>' + '</' + 'script>');
+  parts.push('</svg>');
+  download('floor' + state.floor + '_route.svg', parts.join(NL), 'image/svg+xml');
+  setStatus('已导出 floor' + state.floor + '_route.svg（simpleroutingsvg 规范：block_ 房间 + 节点A_节点B 路径）');
+}
+
+$('btnLoadImg').onclick = loadImg;
+$('btnLoadJson').onclick = loadJson;
+$('modeMove').onclick = function () { setMode('move'); };
+$('modeNode').onclick = function () { setMode('node'); };
+$('modeEdge').onclick = function () { setMode('edge'); };
+$('modeDel').onclick = function () { setMode('del'); };
+$('btnSaveJson').onclick = exportJson;
+$('btnSaveSvg').onclick = exportSvg;
+$('btnClear').onclick = function () {
+  if (!state.nodes.length) return;
+  if (window.confirm('确认清空当前层的全部标注？')) {
+    state.nodes = [];
+    state.edges = [];
+    state.sel = null;
+    redraw();
+    renderList();
+    setStatus('已清空');
+  }
+};
+$('floorSel').onchange = function () {
+  state.nodes = [];
+  state.edges = [];
+  state.img = null;
+  state.sel = null;
+  state.pending = null;
+  state.floor = parseInt($('floorSel').value, 10);
+  redraw();
+  renderList();
+  setStatus('已切换楼层，请重新加载平面图与路网');
+};
+</script>
+</body>
+</html>

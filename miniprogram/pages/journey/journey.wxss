@@ -1,0 +1,91 @@
+.dept-row {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #eef1f5;
+}
+
+.dept-name {
+  font-weight: 700;
+}
+
+.dept-header {
+  border-top: 8rpx solid #2f6fed;
+}
+
+.step-now-label {
+  font-size: 28rpx;
+  color: #2f6fed;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.step-desc {
+  margin: 12rpx 0;
+}
+
+.tip-item {
+  background: #fff8ec;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin: 10rpx 0;
+  font-size: 30rpx;
+  color: #7a5200;
+}
+
+.next-btn {
+  margin-left: 12rpx;
+}
+
+.step-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #eef1f5;
+}
+
+.step-row.current {
+  background: #e8f0fe;
+  border-radius: 14rpx;
+  padding: 20rpx;
+}
+
+.step-row.done {
+  opacity: 0.55;
+}
+
+.step-no {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #d7e3fb;
+  color: #2f6fed;
+  font-size: 28rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.step-row.current .step-no {
+  background: #2f6fed;
+  color: #ffffff;
+}
+
+.step-title {
+  font-weight: 700;
+}
+
+.step-poi {
+  color: #2e9e6b;
+}
+
+.prep-item {
+  margin: 16rpx 0;
+}
+
+.prep-name {
+  font-weight: 700;
+}

@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="card" wx:if="{{showPicker}}">
+    <view class="title-md">请选择就诊科室</view>
+    <view class="dept-row" wx:for="{{deptList}}" wx:key="id" bindtap="pickDept" data-index="{{index}}">
+      <view class="flex-1">
+        <view class="text-body dept-name">{{item.name}}</view>
+        <view class="text-hint">{{item.floor}} 楼 | {{item.intro}}</view>
+      </view>
+      <view class="tag">选择</view>
+    </view>
+  </view>
+
+  <block wx:if="{{card}}">
+    <view class="card dept-header">
+      <view class="title-lg">{{card.dept.name}}</view>
+      <view class="text-body">就诊科室在 {{card.dept.floor}} 楼</view>
+      <view class="btn-primary" bindtap="goNavigate">带我去 {{placeLabel || card.dept.name}}</view>
+    </view>
+
+    <view class="card" wx:if="{{step}}">
+      <view class="step-now-label">当前第 {{step.index + 1}} 步 / 共 {{step.total}} 步</view>
+      <view class="title-lg">{{step.title}}</view>
+      <view class="text-body step-desc">{{step.desc}}</view>
+      <view class="tip-item" wx:for="{{step.tips}}" wx:key="index">{{item}}</view>
+      <view class="row">
+        <view class="btn-secondary flex-1" bindtap="prevStep">上一步</view>
+        <view class="btn-primary flex-1 next-btn" bindtap="nextStep">完成这一步</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title-md">全部流程</view>
+      <view class="step-row {{step && step.index === index ? 'current' : ''}} {{state && state.done_keys.length > index ? 'done' : ''}}"
+            wx:for="{{card.steps}}" wx:key="key">
+        <view class="step-no">{{index + 1}}</view>
+        <view class="flex-1">
+          <view class="text-body step-title">{{item.title}}</view>
+          <view class="text-hint">{{item.desc}}</view>
+          <view class="text-hint step-poi" wx:if="{{item.poi}}">{{item.poi}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{card.exam_prep.length > 0}}">
+      <view class="title-md">检查前须知</view>
+      <view class="prep-item" wx:for="{{card.exam_prep}}" wx:key="id">
+        <view class="text-body prep-name">{{item.exam_name}} <text wx:if="{{item.fasting}}" class="tag-warn tag">需空腹</text></view>
+        <view class="text-hint">{{item.prep_text}}</view>
+      </view>
+    </view>
+  </block>
+</view>

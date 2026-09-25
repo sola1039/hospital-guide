@@ -1,0 +1,39 @@
+<view class="page">
+  <view class="card">
+    <view class="title-md">就诊人信息</view>
+    <view class="form-row">
+      <view class="form-label">姓名</view>
+      <input class="form-input" placeholder="请输入就诊人姓名" value="{{patientName}}" bindinput="onNameInput" />
+    </view>
+    <view class="text-hint">填好姓名后, 挂号记录会按姓名自动筛选</view>
+  </view>
+
+  <view class="card">
+    <view class="title-md">挂号记录</view>
+    <view class="record-row" wx:for="{{records}}" wx:key="id">
+      <view class="flex-1">
+        <view class="text-body">{{item.dept_name}} | {{item.doctor_name}}</view>
+        <view class="text-hint">{{item.visit_date}} {{item.slot}} | {{item.status}}</view>
+      </view>
+      <view class="tag">{{item.floor}}F</view>
+    </view>
+    <view class="text-hint" wx:if="{{records.length === 0}}">还没有挂号记录</view>
+  </view>
+
+  <view class="card">
+    <view class="title-md">快捷入口</view>
+    <view class="btn-secondary" bindtap="goRegister">去挂号(演示)</view>
+    <view class="btn-secondary" bindtap="goJourney">我的就诊流程</view>
+    <view class="btn-secondary" bindtap="goGuide">用药与检查须知</view>
+  </view>
+
+  <view class="card about-card">
+    <view class="title-md">关于</view>
+    <view class="text-hint about-line">本小程序为深圳大学医院就医陪伴演示</view>
+    <view class="text-hint about-line">开发者: 武汉光影流明科技有限公司</view>
+    <view class="text-hint about-line">版本号: v0.1.0</view>
+    <view class="text-hint about-line">数据来源: 深圳大学医院公开数据</view>
+    <view class="text-hint about-line">免责声明: 本小程序仅提供就医引导服务, 不构成任何医疗建议, 诊疗方案请以医生意见为准</view>
+    <view class="text-hint about-line">版权: 2026 武汉光影流明科技有限公司 保留所有权利</view>
+  </view>
+</view>

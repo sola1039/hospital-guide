@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="card">
+    <view class="picker-row">
+      <view class="picker-label">从</view>
+      <picker mode="selector" range="{{startNames}}" value="{{startIndex}}" bindchange="onStartChange">
+        <view class="picker-value">{{startNames[startIndex] || '主入口'}}</view>
+      </picker>
+    </view>
+    <view class="picker-row">
+      <view class="picker-label">到</view>
+      <picker mode="selector" range="{{endNames}}" value="{{endIndex}}" bindchange="onEndChange">
+        <view class="picker-value">{{endNames[endIndex] || '请选择目的地'}}</view>
+      </picker>
+    </view>
+    <view class="btn-primary" bindtap="startNavigate">{{loading ? '正在规划路线...' : '开始导航'}}</view>
+  </view>
+
+  <view class="card map-card">
+    <view class="floor-tabs">
+      <view class="floor-tab {{currentFloor === item ? 'active' : ''}} {{routeFloors[item] ? 'has-route' : ''}}"
+            wx:for="{{[1, 2, 3, 4]}}" wx:key="index" bindtap="switchFloor" data-floor="{{item}}">
+        {{item}}F
+      </view>
+    </view>
+    <canvas type="2d" id="mapCanvas" class="map-canvas"></canvas>
+    <view class="text-hint map-hint">红色线是路线, 绿点是起点, 红点是终点, 橙点是换楼层的地方</view>
+  </view>
+
+  <view class="card" wx:if="{{route}}">
+    <view class="title-md">路线指引</view>
+    <view class="route-summary">
+      全程约 {{route.distance_m}} 米 | 从 {{route.start.name}} 到 {{route.end.name}}
+    </view>
+    <view class="step-line" wx:for="{{route.steps}}" wx:key="index">
+      <view class="step-dot"></view>
+      <view class="text-body flex-1">{{item.text}}</view>
+    </view>
+    <view class="btn-secondary" bindtap="startNavigate">重新规划</view>
+  </view>
+</view>

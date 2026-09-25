@@ -1,0 +1,12 @@
+.env
+Temp/
+__pycache__/
+*.pyc
+*.zip
+input/database/hospital.db
+
+# 模板源码是0字节残缺空壳, 只保留截图和说明
+hospitalRegistePublic-master/*
+!hospitalRegistePublic-master/picture/
+!hospitalRegistePublic-master/picture/**
+!hospitalRegistePublic-master/README.md
